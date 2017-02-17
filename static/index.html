@@ -1,0 +1,68 @@
+<html>
+	<head>
+		<link href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" type="text/css" >
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css" type="text/css">
+	</head>
+<body>
+	<div class="nav">
+
+	</div>
+	<div class="container">
+		<div class="">
+			<label for="SetTemp_F">Set Temp (F)</label>
+			<input id="SetTemp_F" />
+			<input id="Id" type="hidden">
+			<button class="btn" id="SetTempButton">Set</button>
+		</div>
+		<div class="status">
+			<label id="state">STATE</label>
+			<label id="temp_f">0(F)</label>
+		</div>
+		<div class="graph">
+			<img id="fermentationGraph" src="/Graph/Fermentation" />
+			<img id="stateGraph" src="/Graph/State" />
+			<img id="ambientGraph" src="/Graph/Ambient" />
+		</div>
+	</div>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-3.1.1.min.js" ></script>
+	<script type="text/javascript" src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js" ></script>
+	<script type="text/javascript">
+
+		function loadData() {
+
+		    $("#fermentationGraph").attr("src", "/Graph/Fermentation?timestamp=" + new Date().getTime());
+		    $("#stateGraph").attr("src", "/Graph/State?timestamp=" + new Date().getTime());
+		    $("#ambientGraph").attr("src", "/Graph/Ambient?timestamp=" + new Date().getTime());
+
+			$.get("/Temp", function(data){
+				for(var i = 0; i < data.length; i++)
+				{
+				    var sensor = data[i];
+				    if(sensor.ID == 1)
+					{
+					    $("#SetTemp_F").val(sensor.SetTemp_F);
+					    $("#Id").val(sensor.ID)
+
+						$("#state").html(sensor.State);
+					    $("#temp_f").html(sensor.Temp_F);
+					}
+
+				}
+				setTimeout(loadData, 1000);
+        	});
+		}
+
+		$(document).ready(function(){
+			$("#SetTempButton").click(function()
+			{
+			    $.post("/Temp", {
+			        "Id" : $("#Id").val(),
+					"SetTemp_F" : $("#SetTemp_F").val()
+				});
+			});
+
+			loadData();
+		});
+
+	</script>
+</html>
